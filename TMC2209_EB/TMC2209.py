@@ -1,0 +1,286 @@
+from  TMC2209_EB.registers import * 
+from .uart import UART
+
+
+
+class TMC2209Configure:
+    """
+    Represents the TMC2209 configuration, including registers, microsteps,
+    current, and voltage. Excludes GPIO pins and UART handler for simplicity.
+    """
+
+    def __init__(self , uart: UART,MS1,MS2,EN, node_address):
+
+        self.uart = uart
+        self.ms1 = MS1
+        self.ms2= MS2
+        self.en= EN
+        
+        # Configuration parameters
+        self.node_address = node_address  # Node address for the TMC2209
+        self.micro_steps = 16       # Default microsteps
+        self.vref = 800             # Voltage reference in mV
+        self.imax = 1.2             # Maximum current in A
+
+        # Registers
+        self.gconf = GCONF()
+        self.gstat = GSTAT()
+        self.ifcnt = IFCNT()
+        self.nodeconf = NODECONF()
+        self.otp_prog = OTP_PROG()
+        self.otp_read = OTP_READ()
+        self.ioin = IOIN()
+        self.factory_conf = FACTORY_CONF()
+        self.ihold_irun = IHOLD_IRUN()
+        self.tpowerdown = TPOWERDOWN()
+        self.tstep = TSTEP()
+        self.tpwmthrs = TPWMTHRS()
+        self.vactual = VACTUAL()
+        self.tcoolthrs = TCOOLTHRS()
+        self.sgthrs = SGTHRS()
+        self.sg_result = SG_RESULT()
+        self.coolconf = COOLCONF()
+        self.mscnt = MSCNT()
+        self.mscuract = MSCURACT()
+        self.chopconf = CHOPCONF()
+        self.drv_status = DRV_STATUS()
+        self.pwmconf = PWMCONF()
+        self.pwm_scale = PWM_SCALE()
+        self.pwm_auto = PWM_AUTO()
+
+    @staticmethod
+    def _calculate_crc(data: list) -> int:
+        """
+        Calculate the CRC for a given data array based on TMC2209 specifications.
+
+        :param data: List of bytes to calculate the CRC for.
+        :return: Calculated CRC value (8-bit).
+        """
+        crc = 0
+        for byte in data:
+            crc ^= byte
+        return crc
+
+
+    def send_register(self, data: int, address: int):
+        """
+        Sends a value to a specific register of the TMC2209 driver.
+
+        :param data: Data to write into the register (32-bit).
+        :param address: Address of the register to write to (8-bit).
+        """
+        # Construct the packet
+        packet = [
+            0x5,  # Sync byte
+            self.node_address,  # Node address
+            (1 << 7) | address,  # Register address
+            (data >> 24) & 0xFF,  # Data byte 1
+            (data >> 16) & 0xFF,  # Data byte 2
+            (data >> 8) & 0xFF,   # Data byte 3
+            data & 0xFF           # Data byte 4
+        ]
+
+        # Compute CRC and append it to the packet
+        crc = self._calculate_crc(packet[:7])
+        packet.append(crc)
+
+        # Send the packet over UART
+        self.uart.write(bytes(packet))
+        for byte in bytes(packet):
+            print(bin(byte)[2:].zfill(8))
+
+    def send_read_request(self, address: int):
+        """
+        Sends a read request to a specific register of the TMC2209 driver.
+
+        :param address: Address of the register to read from (7-bit).
+        """
+        # Combine the 7-bit address and RW bit (RW = 0 for read, MSB is 0)
+        
+
+        # Construct the datagram for a read request
+        packet = [
+            0x05,  # Sync byte (bits 0-7)
+            0x00,  # Reserved byte (bits 8-15, included in CRC)
+            self.node_address,  # 8-bit node address (bits 16-23)
+            (0 << 7) | address  # RW (MSB = 0) + 7-bit register address (bits 24-31)
+        ]
+
+        # Compute CRC for the first 3 bytes and append it
+        crc = self._calculate_crc(packet)
+        packet.append(crc)
+
+        # Transmit the datagram over UART
+        self.uart.write(bytes(packet))
+    
+    def read_register(self, address: int) -> int:
+        """
+        Reads the value of a specific register from the TMC2209 driver.
+
+        :param address: Address of the register to read from (7-bit).
+        :return: 32-bit data read from the register.
+        """
+        # Send the read request using the existing send_read_request function
+        self.send_read_request(address)
+
+        # Receive the response from the TMC2209
+        # The response packet should be 8 bytes: Sync, Reserved, Address, Register, Data (4 bytes), CRC
+        response = self.uart.read(8)
+
+        # Verify the CRC of the received response
+        if self._calculate_crc(response[:-1]) != response[-1]:
+            raise ValueError("CRC mismatch in response packet")
+
+        # Extract the 32-bit data from the response (bytes 4-6)
+        data = (
+            (response[4] << 16) |
+            (response[5] << 8) |
+            (response[6]) 
+        )
+
+        return data
+
+    def write_GCONF(self):
+        self.send_register(self.gconf.reg, GCONF_adr)
+
+    def write_GSTAT(self):
+        self.send_register(self.gstat.reg, GSTAT_adr)
+
+    def write_NODECONF(self):
+        self.send_register(self.nodeconf.reg, NODECONF_adr)
+
+    def write_OTP_PROG(self):
+        self.send_register(self.otp_prog.reg, OTP_PROG_adr)
+
+    def write_FACTORY_CONF(self):
+        self.send_register(self.factory_conf.reg, FACTORY_CONF_adr)
+
+    def write_IHOLD_IRUN(self):
+        self.send_register(self.ihold_irun.reg, IHOLD_IRUN_adr)
+
+    def write_TPOWERDOWN(self):
+        self.send_register(self.tpowerdown.reg, TPOWER_DOWN_adr)
+
+    def write_TPWMTHRS(self):
+        self.send_register(self.tpwmthrs.reg, TPWMTHRS_adr)
+
+    def write_VACTUAL(self):
+        self.send_register(self.vactual.reg, VACTUAL_adr)
+
+    def write_TCOOLTHRS(self):
+        self.send_register(self.tcoolthrs.reg, TCOOLTHRS_adr)
+
+    def write_SGTHRS(self):
+        self.send_register(self.sgthrs.reg, SGTHRS_adr)
+
+    def write_COOLCONF(self):
+        self.send_register(self.coolconf.reg, COOLCONF_adr)
+
+    def write_CHOPCONF(self):
+        self.send_register(self.chopconf.reg, CHOPCONF_adr)
+
+    def write_PWMCONF(self):
+        self.send_register(self.pwmconf.reg, PWMCONF_adr)
+
+    def read_GSTAT(self):
+        self.gstat.reg = self.read_register(GSTAT_adr)
+        return self.gstat.reg
+
+    def read_IFCNT(self):
+        self.ifcnt.reg = self.read_register(IFCNT_adr)
+        return self.ifcnt.reg
+
+    def read_OTP_READ(self):
+        self.otp_read.reg = self.read_register(OTP_READ_adr)
+        return self.otp_read.reg
+
+    def read_IOIN(self):
+        self.ioin.reg = self.read_register(IOIN_adr)
+        return self.ioin.reg
+
+    def read_FACTORY_CONF(self):
+        self.factory_conf.reg = self.read_register(FACTORY_CONF_adr)
+        return self.factory_conf.reg
+
+    def read_TSTEP(self):
+        self.tstep.reg = self.read_register(TSTEP_adr)
+        return self.tstep.reg
+
+    def read_SG_RESULT(self):
+        self.sg_result.reg = self.read_register(SG_RESULT_adr)
+        return self.sg_result.reg
+
+    def read_MSCNT(self):
+        self.mscnt.reg = self.read_register(MSCNT_adr)
+        return self.mscnt.reg
+
+    def read_MSCURACT(self):
+        self.mscuract.reg = self.read_register(MSCURACT_adr)
+        return self.mscuract.reg
+
+    def read_CHOPCONF(self):
+        self.chopconf.reg = self.read_register(CHOPCONF_adr)
+        return self.chopconf.reg
+
+    def read_DRV_STATUS(self):
+        self.drv_status.reg = self.read_register(DRV_STATUS_adr)
+        return self.drv_status.reg
+
+    def read_PWMCONF(self):
+        self.pwmconf.reg = self.read_register(PWMCONF_adr)
+        return self.pwmconf.reg
+
+    def read_PWM_SCALE(self):
+        self.pwm_scale.reg = self.read_register(PWM_SCALE_adr)
+        return self.pwm_scale.reg
+
+    def read_PWM_AUTO(self):
+        self.pwm_auto.reg = self.read_register(PWM_AUTO_adr)
+        return self.pwm_auto.reg
+
+
+    def __repr__(self):
+        """
+        String representation of the TMC2209 configuration.
+        """
+        return (
+            f"TMC2209Configure(node_address={self.node_address}, micro_steps={self.micro_steps}, "
+            f"vref={self.vref} mV, imax={self.imax} A, MS1={self.ms1}, MS2={self.ms2})"
+        )
+
+uart1 = UART("COM3",115200)
+tmc2209 = TMC2209Configure(uart1, 1,2,3,0)   
+
+tmc2209.gconf.I_scale_analog = 1
+tmc2209.gconf.mstep_reg_select = 1
+tmc2209.gconf.multistep_filt = 1
+tmc2209.gconf.test_mode = 1
+
+#tmc2209.write_GCONF()
+
+tmc2209.chopconf.toff = 5
+tmc2209.chopconf.hstrt = 5
+tmc2209.chopconf.vsense = 1
+tmc2209.chopconf.mres = 2
+tmc2209.chopconf.intpol = 1
+
+tmc2209.write_CHOPCONF()
+
+tmc2209.ihold_irun.IHOLD = 7
+tmc2209.ihold_irun.IRUN = 14
+tmc2209.ihold_irun.IHOLDDELAY = 1
+
+#tmc2209.write_IHOLD_IRUN()
+
+tmc2209.pwmconf.PWM_OFS = 36
+tmc2209.pwmconf.PWM_FREQ = 1
+tmc2209.pwmconf.PWM_autoscale = 1
+tmc2209.pwmconf.PWM_GRAD = 1
+tmc2209.pwmconf.PWM_REG = 1
+tmc2209.pwmconf.PWM_LIM = 12
+#tmc2209.write_PWMCONF()
+
+tmc2209.vactual.VACTUAL = 0xFF
+#tmc2209.write_VACTUAL()
+
+
