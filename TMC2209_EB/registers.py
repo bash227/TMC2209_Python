@@ -1343,72 +1343,72 @@ class CHOPCONF:
     @property
     def tbl(self):
         """Get the 2-bit tbl field (bits 11–12)."""
-        return (self.reg >> 11) & 0x3
+        return (self.reg >> 15) & 0x3
 
     @tbl.setter
     def tbl(self, value):
         """Set the 2-bit tbl field (bits 11–12)."""
-        self.reg = (self.reg & ~(0x3 << 11)) | ((value & 0x3) << 11)
+        self.reg = (self.reg & ~(0x3 << 15)) | ((value & 0x3) << 15)
 
     @property
     def vsense(self):
         """Get the 1-bit vsense field (bit 13)."""
-        return (self.reg >> 13) & 0x1
+        return (self.reg >> 17) & 0x1
 
     @vsense.setter
     def vsense(self, value):
         """Set the 1-bit vsense field (bit 13)."""
-        self.reg = (self.reg & ~(0x1 << 13)) | ((value & 0x1) << 13)
+        self.reg = (self.reg & ~(0x1 << 17)) | ((value & 0x1) << 17)
 
     @property
     def mres(self):
         """Get the 4-bit mres field (bits 19–22)."""
-        return (self.reg >> 19) & 0xF
+        return (self.reg >> 24) & 0xF
 
     @mres.setter
     def mres(self, value):
         """Set the 4-bit mres field (bits 19–22)."""
-        self.reg = (self.reg & ~(0xF << 19)) | ((value & 0xF) << 19)
+        self.reg = (self.reg & ~(0xF << 24)) | ((value & 0xF) << 24)
 
     @property
     def intpol(self):
         """Get the 1-bit intpol field (bit 23)."""
-        return (self.reg >> 23) & 0x1
+        return (self.reg >> 28) & 0x1
 
     @intpol.setter
     def intpol(self, value):
         """Set the 1-bit intpol field (bit 23)."""
-        self.reg = (self.reg & ~(0x1 << 23)) | ((value & 0x1) << 23)
+        self.reg = (self.reg & ~(0x1 << 28)) | ((value & 0x1) << 28)
 
     @property
     def dedge(self):
         """Get the 1-bit dedge field (bit 24)."""
-        return (self.reg >> 24) & 0x1
+        return (self.reg >> 29) & 0x1
 
     @dedge.setter
     def dedge(self, value):
         """Set the 1-bit dedge field (bit 24)."""
-        self.reg = (self.reg & ~(0x1 << 24)) | ((value & 0x1) << 24)
+        self.reg = (self.reg & ~(0x1 << 29)) | ((value & 0x1) << 29)
 
     @property
     def diss2g(self):
         """Get the 1-bit diss2g field (bit 25)."""
-        return (self.reg >> 25) & 0x1
+        return (self.reg >> 30) & 0x1
 
     @diss2g.setter
     def diss2g(self, value):
         """Set the 1-bit diss2g field (bit 25)."""
-        self.reg = (self.reg & ~(0x1 << 25)) | ((value & 0x1) << 25)
+        self.reg = (self.reg & ~(0x1 << 30)) | ((value & 0x1) << 30)
 
     @property
     def diss2vs(self):
         """Get the 1-bit diss2vs field (bit 26)."""
-        return (self.reg >> 26) & 0x1
+        return (self.reg >> 31) & 0x1
 
     @diss2vs.setter
     def diss2vs(self, value):
         """Set the 1-bit diss2vs field (bit 26)."""
-        self.reg = (self.reg & ~(0x1 << 26)) | ((value & 0x1) << 26)
+        self.reg = (self.reg & ~(0x1 << 31)) | ((value & 0x1) << 31)
 
     def __repr__(self):
         """
