@@ -24,10 +24,12 @@ class UART:
             self.connection.open()
         self.connection.write(data)
         
+        
     def read_message(self,size:int) -> bytes:
         if not self.connection.is_open:
             self.connection.open()
-        self.connection.read(size)
+        return self.connection.read(size)
+        
         
     def close(self):
         if self.connection.is_open:

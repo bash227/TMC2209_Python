@@ -22,6 +22,8 @@ class TMC2209Configure:
         self.micro_steps = 16       # Default microsteps
         self.vref = 800             # Voltage reference in mV
         self.imax = 1.2             # Maximum current in A
+        self.delay = 0
+
 
         # Registers
         self.gconf = GCONF()
@@ -48,6 +50,9 @@ class TMC2209Configure:
         self.pwmconf = PWMCONF()
         self.pwm_scale = PWM_SCALE()
         self.pwm_auto = PWM_AUTO()
+        
+        
+       
 
     @staticmethod
     def _calculate_crc(data: list) -> int:
@@ -89,8 +94,7 @@ class TMC2209Configure:
 
         # Send the packet over UART
         self.uart.send_message(bytes(packet))
-        for byte in bytes(packet):
-            print(bin(byte)[2:].zfill(8))
+        
 
     def send_read_request(self, address: int):
         """
@@ -122,26 +126,30 @@ class TMC2209Configure:
         :param address: Address of the register to read from (7-bit).
         :return: 32-bit data read from the register.
         """
-        pass
-#        # Send the read request using the existing send_read_request function
-#        self.send_read_request(address)
-#
-#        # Receive the response from the TMC2209
-#        # The response packet should be 8 bytes: Sync, Reserved, Address, Register, Data (4 bytes), CRC
-#        response = self.uart.read(8)
-#
-#        # Verify the CRC of the received response
-#       if self._calculate_crc(response[:-1]) != response[-1]:
-#            raise ValueError("CRC mismatch in response packet")
-#
-#        # Extract the 32-bit data from the response (bytes 4-6)
-#        data = (
-#            (response[4] << 16) |
-#            (response[5] << 8) |
-#            (response[6]) 
-#        )
-#
-#        return data
+        
+
+       # Send the read request using the existing send_read_request function
+        self.send_read_request(address)
+        while True:
+            response = self.uart.read_message(8)
+            
+            if response and len(response) == 8:
+                if self._calculate_crc(response[:-1]) == response[-1]:  # Verify CRC
+                    # Extract the 32-bit data from the response (bytes 4-7)
+                    data = (
+                        (response[3] << 24) |
+                        (response[4] << 16) |
+                        (response[5] << 8)  |
+                        (response[6]) 
+                    )
+                    break  # Exit loop when valid data is received
+                else:
+                    print("CRC mismatch! Retrying...")  # Debugging message
+            else:
+                print("Invalid response size! Retrying...")  # Debugging message
+                
+
+        return data
 
     def write_GCONF(self):
         self.send_register(self.gconf.reg, GCONF_adr)
@@ -241,6 +249,84 @@ class TMC2209Configure:
         self.pwm_auto.reg = self.read_register(PWM_AUTO_adr)
         return self.pwm_auto.reg
 
+    def initialize(self):
+        self.chopconf.toff = 5
+        self.chopconf.hstrt = 5
+        self.chopconf.vsense = 1
+        self.chopconf.intpol = 1
+        self.chopconf.mres = 4
+        self.write_CHOPCONF()
+
+        self.ihold_irun.IHOLD = 0
+        self.ihold_irun.IRUN = 15
+        self.ihold_irun.IHOLDDELAY = 1
+        self.write_IHOLD_IRUN()
+
+        self.gconf.I_scale_analog = 1
+        self.gconf.mstep_reg_select = 1
+        self.gconf.multistep_filt = 1
+        self.gconf.pdn_disable = 1
+        self.gconf.shaft = 0
+        self.write_GCONF()
+
+        self.nodeconf.SENDDELAY = 7
+        self.write_NODECONF()
+
+        self.pwmconf.PWM_OFS = 36
+        self.pwmconf.PWM_FREQ = 1
+        self.pwmconf.PWM_autoscale = 1
+        self.pwmconf.PWM_autograd = 1
+        self.pwmconf.PWM_REG = 1
+        self.pwmconf.PWM_LIM = 12
+        self.write_PWMCONF()
+        
+        pins = [self.en, self.ms1, self.ms2]
+
+        GPIO.setmode(GPIO.BOARD) #physical pin numbering
+
+        for pin in pins:
+            GPIO.setup(pin,GPIO.OUT) #all pins are set to output
+
+        GPIO.output(self.en, GPIO.LOW) #to enable the driver
+        GPIO.output(self.ms1, GPIO.LOW) #1/8 stepping (use uart mode, for finer control and advanced features)
+        GPIO.output(self.ms2, GPIO.LOW)
+        
+        
+    def enable(self):
+        GPIO.output(self.en, GPIO.LOW)
+        
+    def disable(self):
+        GPIO.output(self.en, GPIO.HIGH)
+
+    def set_SENDDELAY(self, byte_times):
+        if byte_times % 2 == 0:
+            byte_times += 1
+
+        self.nodeconf.SENDDELAY = byte_times
+        self.write_NODECONF()
+        self.delay = 8 * byte_times / self.uart.baudrate
+        print(f"Send delay is set to {self.delay}\'s")
+        
+        
+    def set_MRES(self, value):
+        self.chopconf.mres = value
+        self.write_CHOPCONF()
+        self.micro_steps = 256 / pow(2,value)
+        print(f"driver is set to {int(self.micro_steps)} uSteps/full step")
+        
+    def set_velocity(self, uSteps):
+        
+        self.vactual.VACTUAL = int(uSteps *  1.375)
+        self.write_VACTUAL()
+        print(f"velocity is set to {int(uSteps)} uSteps/second")
+        
+    def set_direction(self, direction):
+        self.gconf.shaft =  direction
+        self.write_GCONF()
+        
+        
+#    def setTo_position
+    	
 
     def __repr__(self):
         """
@@ -255,75 +341,28 @@ class TMC2209Configure:
 
 
 #BOARD mode pins
-EN = 31 #18 on BCM
-MS1 = 33 #20 on BCM
-MS2 = 35 #19 on BCM
-
-
-
-pins = [EN, MS1, MS2]
-print(pins)
-
-
-
-GPIO.setmode(GPIO.BOARD) #physical pin numbering
-
-for pin in pins:
-    GPIO.setup(pin,GPIO.OUT) #all pins are set to output
-
-GPIO.output(EN, GPIO.LOW) #to enable the driver
-GPIO.output(MS1, GPIO.LOW) #1/8 stepping (use uart mode, for finer control and advanced features)
-GPIO.output(MS2, GPIO.LOW)
-
-        
+EN_pin = 33
+MS1_pin = 35
+MS2_pin = 32       
 
 uart1 = UART("/dev/ttyTHS1",11520)
-tmc2209 = TMC2209Configure(uart1, EN,MS1,MS2,node_address=0)   
+tmc2209 = TMC2209Configure(uart1,EN=EN_pin,MS1=MS1_pin,MS2=MS2_pin,node_address=0)   
 print(tmc2209)
 
+tmc2209.initialize()
+tmc2209.set_SENDDELAY(7)
+tmc2209.set_MRES(2)
+tmc2209.set_direction(0)
+tmc2209.set_velocity(0)  #256
 
-tmc2209.chopconf.toff = 5
-tmc2209.chopconf.hstrt = 5
-tmc2209.chopconf.vsense = 1
-tmc2209.chopconf.intpol = 1
+tmc2209.enable()
 
-tmc2209.write_CHOPCONF()
-
-tmc2209.ihold_irun.IHOLD = 7
-tmc2209.ihold_irun.IRUN = 15
-tmc2209.ihold_irun.IHOLDDELAY = 1
-
-tmc2209.write_IHOLD_IRUN()
-
-
-tmc2209.gconf.I_scale_analog = 1
-tmc2209.gconf.mstep_reg_select = 1
-tmc2209.gconf.multistep_filt = 1
-tmc2209.gconf.pdn_disable = 1
-
-tmc2209.write_GCONF()
-
-
-
-
-
-tmc2209.nodeconf.SUDDELAY = 0
-tmc2209.write_NODECONF()
-
-tmc2209.pwmconf.PWM_OFS = 36
-tmc2209.pwmconf.PWM_FREQ = 1
-tmc2209.pwmconf.PWM_autoscale = 1
-tmc2209.pwmconf.PWM_autograd = 1
-tmc2209.pwmconf.PWM_REG = 1
-tmc2209.pwmconf.PWM_LIM = 12
-tmc2209.write_PWMCONF()
-
-tmc2209.vactual.VACTUAL = 0xFFFF
-tmc2209.write_VACTUAL()
-a = 0 
 while True:
-	tmc2209.write_VACTUAL()
 
-	
+    print(tmc2209.read_MSCNT())
+    if tmc2209.read_MSCNT() == 256:
+        print("0.1mm is moved")
+
+
     
 
