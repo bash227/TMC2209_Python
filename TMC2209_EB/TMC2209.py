@@ -279,55 +279,8 @@ class TMC2209Configure:
         self.pwmconf.PWM_REG = 1
         self.pwmconf.PWM_LIM = 12
         self.write_PWMCONF()
-        
-        pins = [self.en, self.ms1, self.ms2]
-
-        GPIO.setmode(GPIO.BOARD) #physical pin numbering
-
-        for pin in pins:
-            GPIO.setup(pin,GPIO.OUT) #all pins are set to output
-
-        GPIO.output(self.en, GPIO.LOW) #to enable the driver
-        GPIO.output(self.ms1, GPIO.LOW) #1/8 stepping (use uart mode, for finer control and advanced features)
-        GPIO.output(self.ms2, GPIO.LOW)
-        
-        
-    def enable(self):
-        GPIO.output(self.en, GPIO.LOW)
-        
-    def disable(self):
-        GPIO.output(self.en, GPIO.HIGH)
-
-    def set_SENDDELAY(self, byte_times):
-        if byte_times % 2 == 0:
-            byte_times += 1
-
-        self.nodeconf.SENDDELAY = byte_times
-        self.write_NODECONF()
-        self.delay = 8 * byte_times / self.uart.baudrate
-        print(f"Send delay is set to {self.delay}\'s")
-        
-        
-    def set_MRES(self, value):
-        self.chopconf.mres = value
-        self.write_CHOPCONF()
-        self.micro_steps = 256 / pow(2,value)
-        print(f"driver is set to {int(self.micro_steps)} uSteps/full step")
-        
-    def set_velocity(self, uSteps):
-        
-        self.vactual.VACTUAL = int(uSteps *  1.375)
-        self.write_VACTUAL()
-        print(f"velocity is set to {int(uSteps)} uSteps/second")
-        
-    def set_direction(self, direction):
-        self.gconf.shaft =  direction
-        self.write_GCONF()
-        
-        
-#    def setTo_position
+                
     	
-
     def __repr__(self):
         """
         String representation of the TMC2209 configuration.
