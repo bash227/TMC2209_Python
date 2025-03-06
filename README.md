@@ -14,7 +14,7 @@ pip install pyserial
 ```
 
 ## __Before usage__
-Please read the [datasheet](chrome-extension://efaidnbmnnnibpcajpcglclefindmkaj/https://www.analog.com/media/en/technical-documentation/data-sheets/tmc2209_datasheet_rev1.09.pdf) of TMC2209 to understand the registers and their bits
+Please read the [datasheet](https://www.analog.com/media/en/technical-documentation/data-sheets/tmc2209_datasheet_rev1.09.pdf) of TMC2209 to understand the registers and their bits
 ## 🔧 __Usage__
 ### 1️⃣ Initialize UART Communication
 First, create a **UART** instance to establish serial communication.
