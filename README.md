@@ -14,7 +14,7 @@ pip install pyserial
 ```
 
 ## __Before usage__
-Please read the datasheet of TMC2209 to understand the registers and their bits
+Please read the [datasheet](chrome-extension://efaidnbmnnnibpcajpcglclefindmkaj/https://www.analog.com/media/en/technical-documentation/data-sheets/tmc2209_datasheet_rev1.09.pdf) of TMC2209 to understand the registers and their bits
 ## 🔧 __Usage__
 ### 1️⃣ Initialize UART Communication
 First, create a **UART** instance to establish serial communication.
@@ -41,7 +41,7 @@ You can use this function to make sure that the connections are correct
 ### 4️⃣ Reading and Writing Registers
 ✅ Writing to a Register
 ```python
-tmc.gcong.shaft = 1 # Setting the shaft bit in GCONF register to reverse the direction
+tmc.gconf.shaft = 1 # Setting the shaft bit in GCONF register to reverse the direction
 tmc.write_GCONF()  # Writes GCONF register settings
 ```
 ✅ Reading a Register
@@ -62,7 +62,7 @@ from uart import UART
 from TMC2209 import TMC2209Configure
 
 # Initialize UART communication
-uart = UART(port="/dev/ttyS0", baudrate=115200)
+uart = UART(port="/dev/ttyS0")
 
 # Configure the TMC2209 driver
 tmc = TMC2209Configure(uart=uart, MS1=17, MS2=27, EN=22, node_address=0x00)
