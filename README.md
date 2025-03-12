@@ -39,7 +39,8 @@ tmc.initialize()
 ```
 You can use this function to make sure that the connections are correct
 ### 4️⃣ Reading and Writing Registers
-✅ Writing to a Register
+#### __Writing to a Register__
+
 To write to a register you need to first set or reset the bits you want and then send the registers values.
 tmcModel.RegistersName.bitName = x
 tmcModel.write_RegistersName()
@@ -49,7 +50,7 @@ Example:
 tmc.gconf.shaft = 1 # Setting the shaft bit in GCONF register to reverse the direction
 tmc.write_GCONF()  # Writes GCONF register settings
 ```
-✅ Reading a Register
+Reading a Register
 ```python
 gstat_value = tmc.read_GSTAT()
 print(f"GSTAT Register Value: {gstat_value}")
