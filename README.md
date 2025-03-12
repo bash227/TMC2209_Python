@@ -7,7 +7,7 @@ A Python library to configure and communicate with the TMC2209 stepper motor dri
 - **Configure driver settings** (e.g., current, voltage, microsteps)
 - **UART communication** with TMC2209
 - **Register-level access and control**
-## 📥 **Installation**
+## **Installation**
 This library depends on **pyserial** for UART communication. Install the required dependencies using:
 ```bash
 pip install pyserial
@@ -15,7 +15,7 @@ pip install pyserial
 
 ## __Before usage__
 Please read the [datasheet](https://www.analog.com/media/en/technical-documentation/data-sheets/tmc2209_datasheet_rev1.09.pdf) of TMC2209 to understand the registers and their bits
-## 🔧 __Usage__
+## __Usage__
 ### 1. Initialize UART Communication
 First, create a **UART** instance to establish serial communication.
 ```python
@@ -122,3 +122,7 @@ If your node address is different from `0x00`, ensure that you correctly set the
 ### Extending the Library
 The library is designed to be **hardware-agnostic** so it works on multiple platforms like **Jetson Nano, Raspberry Pi, and other SBCs**.
 You can **extend it by subclassing** `TMC2209Configure` to add your own methods for custom behavior.
+
+## License
+
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
