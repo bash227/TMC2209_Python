@@ -1,7 +1,5 @@
-from  TMC2209_EB.registers import * 
+from  TMC2209_PY.registers import * 
 from .uart import UART
-import Jetson.GPIO as GPIO
-import time
 
 
 class TMC2209Configure:
@@ -17,14 +15,9 @@ class TMC2209Configure:
         self.ms2= MS2
         self.en= EN
         
-        # Configuration parameters
+        
         self.node_address = node_address  # Node address for the TMC2209
-        self.micro_steps = 16       # Default microsteps
-        self.vref = 800             # Voltage reference in mV
-        self.imax = 1.2             # Maximum current in A
-        self.delay = 0
-
-
+        
         # Registers
         self.gconf = GCONF()
         self.gstat = GSTAT()
@@ -71,12 +64,7 @@ class TMC2209Configure:
 
 
     def send_register(self, data: int, address: int):
-        """
-        Sends a value to a specific register of the TMC2209 driver.
-
-        :param data: Data to write into the register (32-bit).
-        :param address: Address of the register to write to (8-bit).
-        """
+        
         # Construct the packet
         packet = [
             0x5,  # Sync byte
@@ -97,12 +85,6 @@ class TMC2209Configure:
         
 
     def send_read_request(self, address: int):
-        """
-        Sends a read request to a specific register of the TMC2209 driver.
-
-        :param address: Address of the register to read from (7-bit).
-        """
-        # Combine the 7-bit address and RW bit (RW = 0 for read, MSB is 0)
         
 
         # Construct the datagram for a read request
@@ -120,14 +102,7 @@ class TMC2209Configure:
         self.uart.send_message(bytes(packet))
     
     def read_register(self, address: int) -> int:
-        """
-        Reads the value of a specific register from the TMC2209 driver.
-
-        :param address: Address of the register to read from (7-bit).
-        :return: 32-bit data read from the register.
-        """
         
-
        # Send the read request using the existing send_read_request function
         self.send_read_request(address)
         while True:

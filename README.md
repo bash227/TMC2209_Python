@@ -118,7 +118,7 @@ uart.close()
 The MS1 and MS2 pins in the uart interface determine the **node address** of the TMC2209 driver. 
 If your node address is different from `0x00`, ensure that you correctly set the **digital values of MS1 and MS2**.
 
-
+---
 ### Extending the Library
 The library is designed to be **hardware-agnostic** so it works on multiple platforms like **Jetson Nano, Raspberry Pi, and other SBCs**.
 You can **extend it by subclassing** `TMC2209Configure` to add your own methods for custom behavior.

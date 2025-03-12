@@ -1,4 +1,4 @@
-from TMC2209_EB import *
+from TMC2209_PY import *
 
 
 #BOARD mode pins
