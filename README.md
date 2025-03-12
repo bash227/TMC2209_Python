@@ -42,7 +42,9 @@ You can use this function to make sure that the connections are correct
 #### __Writing to a Register__
 
 To write to a register you need to first set or reset the bits you want and then send the registers values.
+
 tmcModel.RegistersName.bitName = x
+
 tmcModel.write_RegistersName()
 
 Example:
