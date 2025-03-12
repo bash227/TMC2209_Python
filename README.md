@@ -39,7 +39,7 @@ tmc.initialize()
 ```
 You can use this function to make sure that the connections are correct
 ### 4. Reading and Writing Registers
-#### __Writing to a Register__
+#### 1. __Writing to a Register__
 
 To write to a register, follow these steps:
 
@@ -58,7 +58,7 @@ tmc.gconf.shaft = 1 # Setting the shaft bit in GCONF register to reverse the dir
 tmc.write_GCONF()  # Writes GCONF register settings
 ```
 
-#### __Reading a Register__
+#### 2. __Reading a Register__
 To read the value of a register, follow these steps:
 1. Call the corresponding `read_<RegisterName>()` function.
 2. Store the returned value in a variable.
