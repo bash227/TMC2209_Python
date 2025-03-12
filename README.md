@@ -46,22 +46,34 @@ To write to a register, follow these steps:
 1. Set or reset the desired bits.
 2. Send the updated register values.
 
-### Syntax:
+#### Syntax:
 ```python
 tmcModel.<RegisterName>.<BitName> = <Value>  # Set the bit in the register
 tmcModel.write_<RegisterName>()  # Write the updated register value
 ```
 
-Example:
+#### Example:
 ```python
 tmc.gconf.shaft = 1 # Setting the shaft bit in GCONF register to reverse the direction
 tmc.write_GCONF()  # Writes GCONF register settings
 ```
-Reading a Register
+
+## Reading a Register
+To read the value of a register, follow these steps:
+1. Call the corresponding `read_<RegisterName>()` function.
+2. Store the returned value in a variable.
+
+#### Syntax:
+```python
+<variable_name> = tmc.read_<RegisterName>()  # Read the register value
+```
+
+#### Example:
 ```python
 gstat_value = tmc.read_GSTAT()
 print(f"GSTAT Register Value: {gstat_value}")
 ```
+
 ### 5️⃣ Closing the UART Connection
 ```python
 uart.close()
