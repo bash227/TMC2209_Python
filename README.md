@@ -16,14 +16,14 @@ pip install pyserial
 ## __Before usage__
 Please read the [datasheet](https://www.analog.com/media/en/technical-documentation/data-sheets/tmc2209_datasheet_rev1.09.pdf) of TMC2209 to understand the registers and their bits
 ## 🔧 __Usage__
-### 1️⃣ Initialize UART Communication
+### 1. Initialize UART Communication
 First, create a **UART** instance to establish serial communication.
 ```python
 from uart import UART
 
 uart = UART(port="/dev/ttyS0")  # Use appropriate port
 ```
-### 2️⃣ Configure the TMC2209 Driver
+### 2. Configure the TMC2209 Driver
 Create an instance of **TMC2209Configure** to control the stepper motor.
 
 ```python
@@ -31,14 +31,14 @@ from TMC2209 import TMC2209Configure
 
 tmc = TMC2209Configure(uart=uart, MS1=17, MS2=27, EN=22, node_address=0x00)
 ```
-### 3️⃣ Initialize and Configure the Driver
+### 3. Initialize and Configure the Driver
 To set up the motor driver:
 
 ```python
 tmc.initialize()
 ```
 You can use this function to make sure that the connections are correct
-### 4️⃣ Reading and Writing Registers
+### 4. Reading and Writing Registers
 #### __Writing to a Register__
 
 To write to a register, follow these steps:
@@ -58,7 +58,7 @@ tmc.gconf.shaft = 1 # Setting the shaft bit in GCONF register to reverse the dir
 tmc.write_GCONF()  # Writes GCONF register settings
 ```
 
-## Reading a Register
+#### __Reading a Register__
 To read the value of a register, follow these steps:
 1. Call the corresponding `read_<RegisterName>()` function.
 2. Store the returned value in a variable.
@@ -74,13 +74,20 @@ gstat_value = tmc.read_GSTAT()
 print(f"GSTAT Register Value: {gstat_value}")
 ```
 
-### 5️⃣ Closing the UART Connection
+### 5. Closing the UART Connection
 ```python
 uart.close()
 ```
 
 
 ## 📝 __Full Example Code__
+
+Below is a complete example that:
+- **Initializes** the UART connection.
+- **Configures** the TMC2209 driver.
+- **Writes to the VACTUAL register** to move the motor.
+- **Reads a register value**.
+- **Closes the UART connection** when done.
 
 ```python
 from uart import UART
@@ -106,3 +113,12 @@ print(f"GSTAT Register Value: {gstat_value}")
 # Close the UART connection when done
 uart.close()
 ```
+### Note:
+**Note:**
+The MS1 and MS2 pins determine the **node address** of the TMC2209 driver. 
+If your node address is different from `0x00`, ensure that you correctly set the **digital values of MS1 and MS2**.
+
+
+### Extending the Library
+The library is designed to be **hardware-agnostic** so it works on multiple platforms like **Jetson Nano, Raspberry Pi, and other SBCs**.
+You can **extend it by subclassing** `TMC2209Configure` to add your own methods for custom behavior.
