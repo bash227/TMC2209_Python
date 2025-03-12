@@ -80,7 +80,7 @@ uart.close()
 ```
 
 
-## 📝 __Full Example Code__
+## __Full Example Code__
 
 Below is a complete example that:
 - **Initializes** the UART connection.
@@ -113,7 +113,7 @@ print(f"GSTAT Register Value: {gstat_value}")
 # Close the UART connection when done
 uart.close()
 ```
-### Note:
+
 **Note:**
 The MS1 and MS2 pins in the uart interface determine the **node address** of the TMC2209 driver. 
 If your node address is different from `0x00`, ensure that you correctly set the **digital values of MS1 and MS2**.
