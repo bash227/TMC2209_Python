@@ -40,6 +40,11 @@ tmc.initialize()
 You can use this function to make sure that the connections are correct
 ### 4️⃣ Reading and Writing Registers
 ✅ Writing to a Register
+To write to a register you need to first set or reset the bits you want and then send the registers values.
+tmcModel.RegistersName.bitName = x
+tmcModel.write_RegistersName()
+
+Example:
 ```python
 tmc.gconf.shaft = 1 # Setting the shaft bit in GCONF register to reverse the direction
 tmc.write_GCONF()  # Writes GCONF register settings
