@@ -39,40 +39,40 @@ tmc.initialize()
 ```
 You can use this function to make sure that the connections are correct
 ### 4. Reading and Writing Registers
-#### __Writing to a Register__
+> #### __Writing to a Register__
 
-To write to a register, follow these steps:
+> To write to a register, follow these steps:
+> 
+> 1. Set or reset the desired bits.
+> 2. Send the updated register values.
 
-1. Set or reset the desired bits.
-2. Send the updated register values.
+> #### Syntax:
+> ```python
+> tmcModel.<RegisterName>.<BitName> = <Value>  # Set the bit in the register
+> tmcModel.write_<RegisterName>()  # Write the updated register value
+> ```
+> 
+> #### Example:
+> ```python
+> tmc.gconf.shaft = 1 # Setting the shaft bit in GCONF register to reverse the direction
+> tmc.write_GCONF()  # Writes GCONF register settings
+> ```
 
-#### Syntax:
-```python
-tmcModel.<RegisterName>.<BitName> = <Value>  # Set the bit in the register
-tmcModel.write_<RegisterName>()  # Write the updated register value
-```
-
-#### Example:
-```python
-tmc.gconf.shaft = 1 # Setting the shaft bit in GCONF register to reverse the direction
-tmc.write_GCONF()  # Writes GCONF register settings
-```
-
-#### __Reading a Register__
-To read the value of a register, follow these steps:
-1. Call the corresponding `read_<RegisterName>()` function.
-2. Store the returned value in a variable.
-
-#### Syntax:
-```python
-<variable_name> = tmc.read_<RegisterName>()  # Read the register value
-```
-
-#### Example:
-```python
-gstat_value = tmc.read_GSTAT()
-print(f"GSTAT Register Value: {gstat_value}")
-```
+> #### __Reading a Register__
+> To read the value of a register, follow these steps:
+> 1. Call the corresponding `read_<RegisterName>()` function.
+> 2. Store the returned value in a variable.
+> 
+> #### Syntax:
+> ```python
+> <variable_name> = tmc.read_<RegisterName>()  # Read the register value
+> ```
+> 
+> #### Example:
+> ```python
+> gstat_value = tmc.read_GSTAT()
+> print(f"GSTAT Register Value: {gstat_value}")
+> ```
 
 ### 5. Closing the UART Connection
 ```python
@@ -115,7 +115,7 @@ uart.close()
 ```
 ### Note:
 **Note:**
-The MS1 and MS2 pins determine the **node address** of the TMC2209 driver. 
+The MS1 and MS2 pins in the uart interface determine the **node address** of the TMC2209 driver. 
 If your node address is different from `0x00`, ensure that you correctly set the **digital values of MS1 and MS2**.
 
 
