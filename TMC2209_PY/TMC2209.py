@@ -261,8 +261,8 @@ class TMC2209Configure:
         String representation of the TMC2209 configuration.
         """
         return (
-            f"TMC2209Configure(node_address={self.node_address}, micro_steps={self.micro_steps}, "
-            f"vref={self.vref} mV, imax={self.imax} A, MS1={self.ms1}, MS2={self.ms2})"
+            f"TMC2209Configure(node_address={self.node_address}, "
+            f", MS1={self.ms1}, MS2={self.ms2})"
         )
         
         
