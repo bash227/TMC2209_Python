@@ -122,6 +122,7 @@ class TMC2209Configure:
                     print("CRC mismatch! Retrying...")  # Debugging message
             else:
                 print("Invalid response size! Retrying...")  # Debugging message
+                break
                 
 
         return data
