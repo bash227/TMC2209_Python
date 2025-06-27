@@ -1,5 +1,6 @@
 from  TMC2209_PY.registers import * 
 from .uart import UART
+import time
 
 
 class TMC2209Configure:
