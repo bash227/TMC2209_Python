@@ -101,11 +101,12 @@ class TMC2209Configure:
         # Transmit the datagram over UART
         self.uart.send_message(bytes(packet))
     
-    def read_register(self, address: int) -> int:
+    def read_register(self, address: int, max_retries: int = 3) -> int:
+        retries = 0
+       
         
-       # Send the read request using the existing send_read_request function
-        self.send_read_request(address)
-        while True:
+        while retries < max_retries:
+            self.send_read_request(address)
             response = self.uart.read_message(8)
             
             if response and len(response) == 8:
@@ -122,7 +123,11 @@ class TMC2209Configure:
                     print("CRC mismatch! Retrying...")  # Debugging message
             else:
                 print("Invalid response size! Retrying...")  # Debugging message
-                break
+               
+            retries += 1
+            time.sleep(0.1)  # Small delay between retries
+    
+        raise Exception(f"Failed to read register after {max_retries} attempts")
                 
 
         return data
