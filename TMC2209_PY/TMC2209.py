@@ -118,11 +118,11 @@ class TMC2209Configure:
                         (response[5] << 8)  |
                         (response[6]) 
                     )
-                    break  # Exit loop when valid data is received
+                    return data  # Success case
                 else:
                     print("CRC mismatch! Retrying...")  # Debugging message
             else:
-                print("Invalid response size! Retrying...")  # Debugging message
+                print("Invalid response! Retry attempt", retries + 1)  # Debugging message
                
             retries += 1
             time.sleep(0.1)  # Small delay between retries
