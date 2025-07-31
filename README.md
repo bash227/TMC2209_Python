@@ -122,6 +122,29 @@ uart.close()
 The MS1 and MS2 pins in the uart interface determine the **node address** of the TMC2209 driver. 
 If your node address is different from `0x00`, ensure that you correctly set the **digital values of MS1 and MS2**.
 
+## TMC2209 Single-Wire UART hardware setup
+
+The **TMC2209** uses a **single-wire UART interface** for communication — meaning both **Tx and Rx share the same line**. Some microcontrollers or SBCs (like the **Jetson Nano**) don’t natively support this mode, so you’ll need a small hardware hack to make it work.
+
+Below is a simple circuit that combines **Tx** and **Rx** into a single UART line (named `pdn_UART`) compatible with the TMC2209:
+
+![TMC2209 Single-Wire UART Circuit](./images/circuit.png)
+
+### Circuit Breakdown:
+- **Tx**: From your microcontroller/SBC (e.g., Jetson Nano).  
+- **R2 (1kΩ)**: Limits current flowing into the combined line.  
+- **R3 (4.7kΩ)**: Pull-up resistor to keep the line idle high at 3.3V.  
+- **D2 (1N4007)**: Diode ensures that the Rx pin only sees data intended for it — enforcing directionality.  
+- **Rx**: Connects back to your UART receive pin.  
+
+---
+
+### Why This Matters
+
+The TMC2209 expects UART communication on its **PDN pin**, which is **bidirectional over one wire**. This circuit merges **TX and RX** into a single line (`pdn_UART`) so it can talk to the driver without UART bus contention or logic issues.
+
+> This setup was tested and verified with **Jetson Nano** using 3.3V logic levels. It should work similarly on other boards — just ensure you match logic levels.
+
 ---
 ### Extending the Library
 The library is designed to be **hardware-agnostic** so it works on multiple platforms like **Jetson Nano, Raspberry Pi, and other SBCs**.
