@@ -128,7 +128,7 @@ The **TMC2209** uses a **single-wire UART interface** for communication — mean
 
 Below is a simple circuit that combines **Tx** and **Rx** into a single UART line (named `pdn_UART`) compatible with the TMC2209:
 
-![TMC2209 Single-Wire UART Circuit](./images/circuit.png)
+![TMC2209 Single-Wire UART Circuit](./Images/circuit.png)
 
 ### Circuit Breakdown:
 - **Tx**: From your microcontroller/SBC (e.g., Jetson Nano).  
